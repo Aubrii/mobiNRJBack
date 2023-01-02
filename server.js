@@ -40,25 +40,9 @@ const PORT = process.env.PORT || 8080;
 // require("./app/route/cout.route")(app);
 // require("./app/route/ouvrage.route")(app);
 
-app.use('/users', require('./app/controller/user.controller'));
-app.use('/ouvrages', require('./app/controller/ouvrage.controller'))
-app.use('/devis', require('./app/controller/devis.controller'))
-app.use('/couts',require('./app/controller/cout.controller'));
-app.use('/userDevis',require('./app/controller/userDevis.controller'));
-app.use('/admin',require('./app/controller/superAdmin.controller'))
-app.use('/clients', require('./app/controller/client.controller'));
-app.use('/entreprises', require('./app/controller/entreprise.controller'));
-app.use('/ouvragesCouts', require('./app/controller/ouvrageCout.controller'));
-app.use('/sousLots', require('./app/controller/sousLot.controller'));
-app.use('/sousLotsOuvrages', require('./app/controller/sousLotOuvrage.controller'));
-app.use('/lots', require('./app/controller/lot.controller'));
-app.use('/adresses', require('./app/controller/adresse.controller'))
-app.use('/userEntreprise', require('./app/controller/userEntreprise.controller'))
-app.use('/coutsDuDevis', require('./app/controller/coutDuDevis.controller'))
-app.use('/lotSousLots', require('./app/controller/lotSousLot.controller'))
-app.use('/typeCouts', require('./app/controller/typeCout.controller'))
-app.use('/fournisseurs', require('./app/controller/fournisseur.controller'))
-app.use('/fournisseursCouts', require('./app/controller/fournisseurCout.controller'))
+app.use('/users', require('./app/controllers/user.controller'));
+app.use('/mobis', require('./app/controllers/mobi.controller'));
+
 
 
 app.listen(PORT, () => {
