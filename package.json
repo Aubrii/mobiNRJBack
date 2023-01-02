@@ -1,12 +1,31 @@
 {
   "name": "mobinrjback",
   "version": "1.0.0",
-  "description": "",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Aubrii/mobiNRJBack.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Aubrii/mobiNRJBack/issues"
+  },
+  "homepage": "https://github.com/Aubrii/mobiNRJBack#readme",
+  "description": "",
+  "dependencies": {
+    "sequelize": "^6.25.3",
+    "mysql2": "^2.3.3",
+    "cors": "^2.8.5",
+    "cors": "^2.8.5",
+    "body-parser": "^1.20.1",
+    "express-jwt": "^7.7.7",
+    "rootpath": "^0.1.2",
+    "sequelize": "^6.25.3",
+    "express": "^4.18.2"
+  }
 }
