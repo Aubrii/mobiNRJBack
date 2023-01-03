@@ -23,6 +23,7 @@ async function initialize() {
     db.User = require('../models/user.model')(sequelize);
     db.Mobi = require('../models/mobi.model')(sequelize);
     db.UserMobi = require('../models/userMobi.model')(sequelize)
+    db.Log = require('../models/log.model')(sequelize)
 
     db.User.belongsToMany(db.Mobi, {through: db.UserMobi});
     db.Mobi.belongsToMany(db.User, {through: db.UserMobi});

@@ -42,6 +42,8 @@ const PORT = process.env.PORT || 8080;
 
 app.use('/users', require('./app/controllers/user.controller'));
 app.use('/mobis', require('./app/controllers/mobi.controller'));
+app.use('/usersMobis', require('./app/controllers/userMobi.controller'));
+app.use('/logs', require('./app/controllers/log.controller'));
 
 
 

@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const db = require('../_helpers/db');
 const fs = require("fs");
+let currentUserId = null;
 
 
 module.exports = {
@@ -12,16 +13,7 @@ module.exports = {
     create,
     update,
     delete: _delete,
-    addMobiToUser
 };
-
-async function addMobiToUser(userID, params){
-    typeof params;
-    console.log("params user service : ", params)
-    const user = await db.User.findByPk(userID);
-    await user.addMobi(params.MobiId, params.quantityAutorize, params.quantityGet)
-
-}
 
 
 async function authenticate({ email, password }) {
@@ -32,7 +24,11 @@ async function authenticate({ email, password }) {
 
     // authentication successful
     const token = jwt.sign({sub:user}, config.secret, { expiresIn: '7d' });
+    console.log("console log de l'utilisateur authentifier",user)
+    currentUserId = user.getDataValue('id');
+    console.log("utilisateur courant : ", currentUserId)
     return { ...omitHash(user.get()), token };
+
 }
 
 async function getAll() {
@@ -47,32 +43,23 @@ async function getById(id) {
 }
 
 async function create(userInfo) {
-    // Valider les entrées de l'utilisateur
-    // ...
-
-    // Vérifier si un utilisateur avec la même adresse e-mail existe déjà
     const existingUser = await db.User.findOne({ where: { email: userInfo.email } });
     if (existingUser) {
         throw new Error(`Un utilisateur avec l'adresse e-mail ${userInfo.email} existe déjà`);
+    }else{
+        // Hasher le mot de passe
+        const hashedPassword = await bcrypt.hash(userInfo.password, 10);
+        userInfo.password = hashedPassword;
+        const user = new db.User(userInfo);
+        await user.save();
+        const admin = await db.User.findByPk(currentUserId)
+        const log = new db.Log({
+           history : `L'administateur ${admin.firstName} (id: ${admin.id}) à créer l'utilisateur nommé: ${user.firstName}, email: ${user.email} (id: ${user.id})`
+    })
+        await log.save();
     }
 
-    // Hasher le mot de passe
-    const hashedPassword = await bcrypt.hash(userInfo.password, 10);
 
-    // // Lire l'image téléchargée par l'utilisateur et la convertir en données binaires
-    // const avatar = await fs.promises.readFile(userInfo.avatarUrl);
-    // console.log(avatar)
-    // console.log(userInfo.avatarUrl)
-
-    // Créer l'utilisateur dans la base de données
-
-
-    const user = new db.User(userInfo);
-
-    // save client
-    await user.save();
-    // Ajouter la relation avec l'entreprise
-    //await user.addEntreprise(userInfo.EntrepriseId);
 }
 
 
@@ -82,6 +69,8 @@ async function update(id, params) {
     const user = await getUser(id);
 //TODO: VOIR LA METHODE POUR UPDATE
     // validate
+    console.log("console de l'utilisateur ", user)
+    console.log("console des params ", params)
     const usernameChanged = params.email && user.email !== params.email;
     if (usernameChanged && await db.User.findOne({ where: { email: params.email } })) {
         throw 'Username "' + params.email + '" is already taken';
@@ -94,23 +83,33 @@ async function update(id, params) {
         // Copie de la valeur existante du mot de passe
         params.password = user.password;
     }
-
-
+    const log = new db.Log({
+        history : `L'utilisateur ${user.firstName} (id: ${user.id}) à modifié son profil.
+        Anciennes valeurs: ${user.firstName}, ${user.lastName}, ${user.email},
+        Nouvelles valeurs: ${params.firstName}, ${params.lastName}, ${params.email}`
+    })
     // copy params to user and save
     Object.assign(user, params);
     console.log(params);
 
     // copy params to user and save
+
     await user.save();
+    await log.save();
 
     return omitHash(user.get());
 }
 
+
 async function _delete(id) {
     const user = await getUser(id);
     await user.destroy();
+    const admin = await db.User.findByPk(currentUserId)
+    const log = new db.Log({
+        history : `L'administateur ${admin.firstName} (id: ${admin.id}) à supprimé l'utilisateur nommé: ${user.firstName}, email: ${user.email} (id: ${user.id})`
+    })
+    await log.save();
 }
-
 // helper functions
 
 async function getUser(id) {

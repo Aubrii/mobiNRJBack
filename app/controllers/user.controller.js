@@ -9,7 +9,6 @@ const {addMobiToUser} = require("../services/user.service");
 
 // routes
 
-router.post('/test/:id', addMobiToUsers)
 router.get('/',getAll);
 router.get('/:id', getById);
 router.post('/new', createSchema, create,);
@@ -24,16 +23,7 @@ module.exports = router;
 
 // route functions
 
-function addMobiToUsers(req, res, next){
-    console.log("params", req.params)
-    console.log("body",req.body)
-    userService.addMobiToUser(req.params.id, req.body)
-        .then(() => res.json({
-            message: 'test add mobi user',
-            userMobi: req.body
-        }))
-        .catch(next);
-}
+
 
 function authenticateSchema(req, res, next) {
     const schema = Joi.object({
@@ -99,9 +89,6 @@ function createSchema(req, res, next) {
         role: Joi.string().valid(Role.Admin, Role.Users,Role.SuperAdmin).required(),
         email: Joi.string().email().required(),
         password: Joi.string().min(6).required(),
-        quantityAutorize: Joi.number(),
-        quantityGet: Joi.number()
-
     },);
     console.log('toto')
     validateRequest(req, next, schema);
