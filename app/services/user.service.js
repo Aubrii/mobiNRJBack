@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const db = require('../_helpers/db');
 const fs = require("fs");
+const logService = require('./log.service');
 let currentUserId = null;
 
 
@@ -19,15 +20,24 @@ module.exports = {
 async function authenticate({ email, password }) {
     const user = await db.User.findOne({ where: { email } });
 
-    if (!user || !(await bcrypt.compare(password, user.password)))
+    if (!user || !(await bcrypt.compare(password, user.password))){
         throw 'Username or password is incorrect';
+    }else{
+        // authentication successful
+        const token = jwt.sign({sub:user}, config.secret, { expiresIn: '7d' });
 
-    // authentication successful
-    const token = jwt.sign({sub:user}, config.secret, { expiresIn: '7d' });
-    console.log("console log de l'utilisateur authentifier",user)
-    currentUserId = user.getDataValue('id');
-    console.log("utilisateur courant : ", currentUserId)
-    return { ...omitHash(user.get()), token };
+        currentUserId = user.getDataValue('id');
+        // console.log("utilisateur courant : ", currentUserId)
+        await logService.userConnecting(user)
+        const date = new Date();
+        console.log(user);
+        // console.log("date: ",date)
+        console.log(date.toISOString())
+        user.setDataValue('lastName', 'toto')
+        return { ...omitHash(user.get()), token };
+    }
+
+
 
 }
 
@@ -53,10 +63,8 @@ async function create(userInfo) {
         const user = new db.User(userInfo);
         await user.save();
         const admin = await db.User.findByPk(currentUserId)
-        const log = new db.Log({
-           history : `L'administateur ${admin.firstName} (id: ${admin.id}) à créer l'utilisateur nommé: ${user.firstName}, email: ${user.email} (id: ${user.id})`
-    })
-        await log.save();
+        await logService.adminCreateUser(admin, user);
+
     }
 
 
@@ -64,7 +72,14 @@ async function create(userInfo) {
 
 
 
-
+async function updateDateConnected(email, newDateTime){
+    console.log("email et newDate : ",email, newDateTime)
+    const user = await db.User.findOne({
+        where:{email : email}
+    })
+    user.updatedAt = newDateTime;
+    user.save();
+}
 async function update(id, params) {
     const user = await getUser(id);
 //TODO: VOIR LA METHODE POUR UPDATE
@@ -83,32 +98,26 @@ async function update(id, params) {
         // Copie de la valeur existante du mot de passe
         params.password = user.password;
     }
-    const log = new db.Log({
-        history : `L'utilisateur ${user.firstName} (id: ${user.id}) à modifié son profil.
-        Anciennes valeurs: ${user.firstName}, ${user.lastName}, ${user.email},
-        Nouvelles valeurs: ${params.firstName}, ${params.lastName}, ${params.email}`
-    })
+    await logService.userUpdateUser(user, params)
     // copy params to user and save
     Object.assign(user, params);
     console.log(params);
 
     // copy params to user and save
-
     await user.save();
-    await log.save();
-
     return omitHash(user.get());
 }
 
 
 async function _delete(id) {
     const user = await getUser(id);
-    await user.destroy();
-    const admin = await db.User.findByPk(currentUserId)
-    const log = new db.Log({
-        history : `L'administateur ${admin.firstName} (id: ${admin.id}) à supprimé l'utilisateur nommé: ${user.firstName}, email: ${user.email} (id: ${user.id})`
-    })
-    await log.save();
+    if(user){
+        const admin = await db.User.findByPk(currentUserId)
+        await logService.adminDeleteUser(admin, user)
+        await user.destroy();
+    }else{
+        throw "L'utilisateur n'existe pas"
+    }
 }
 // helper functions
 

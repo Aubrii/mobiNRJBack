@@ -102,6 +102,7 @@ function updateSchema(req, res, next) {
         email: Joi.string().email().empty(''),
         password: Joi.string().min(6).empty(''),
 
+
     })
     validateRequest(req, next, schema);
 }
