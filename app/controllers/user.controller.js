@@ -94,14 +94,11 @@ function _delete(req, res, next) {
 
 function createSchema(req, res, next) {
     const schema = Joi.object({
-        MobiId: Joi.number(),
         firstName: Joi.string().required(),
         lastName: Joi.string().required(),
         role: Joi.string().valid(Role.Admin, Role.Users,Role.SuperAdmin).required(),
         email: Joi.string().email().required(),
         password: Joi.string().min(6).required(),
-        quantityAutorize: Joi.number(),
-        quantityGet: Joi.number(),
         avatarUrl: Joi.string()
 
     },);

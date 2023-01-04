@@ -1,4 +1,4 @@
-const config = require('../db.config.json');
+const config = require('../../db.config.json');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const db = require('../_helpers/db');
@@ -50,7 +50,7 @@ async function update(id, params) {
     const mobi = await getMobi(id);
 //TODO: VOIR LA METHODE POUR UPDATE
     // validate
-    const mobiNameChanged = params.name && user.name !== params.name;
+    const mobiNameChanged = params.name && mobi.name !== params.name;
     if (mobiNameChanged && await db.Mobi.findOne({ where: { name: params.name } })) {
         throw 'Mobi name "' + params.name + '" is already taken';
     }
