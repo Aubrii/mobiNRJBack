@@ -6,17 +6,18 @@ const userService = require('../services/User.service');
 const db = require("../_helpers/db");
 const validateRequest = require('../_middleware/validate-request');
 const {addMobiToUser} = require("../services/user.service");
+const authorize = require("../_middleware/authorize");
 
 // routes
 
 router.post('/test/:id', addMobiToUsers)
-router.get('/',getAll);
-router.get('/:id', getById);
-router.post('/new', createSchema, create,);
-router.put('/:id', updateSchema, update);
-router.delete('/:id', _delete);
+router.get('/',authorize(), getAll);
+router.get('/:id',authorize(), getById);
+router.post('/new',authorize(), createSchema, create,);
+router.put('/:id',authorize(), updateSchema, update);
+router.delete('/:id',authorize(), _delete);
 router.post('/authenticate', authenticateSchema, authenticate);
-router.get('/current', getCurrent);
+router.get('/current',authorize(), getCurrent);
 
 
 
@@ -100,7 +101,8 @@ function createSchema(req, res, next) {
         email: Joi.string().email().required(),
         password: Joi.string().min(6).required(),
         quantityAutorize: Joi.number(),
-        quantityGet: Joi.number()
+        quantityGet: Joi.number(),
+        avatarUrl: Joi.string()
 
     },);
     console.log('toto')
@@ -114,6 +116,8 @@ function updateSchema(req, res, next) {
         role: Joi.string().valid(Role.Admin, Role.Users,Role.SuperAdmin).empty(''),
         email: Joi.string().email().empty(''),
         password: Joi.string().min(6).empty(''),
+        avatarUrl: Joi.string()
+
 
     })
     validateRequest(req, next, schema);

@@ -1,4 +1,4 @@
-const config = require('../../db.config.json');
+const config = require('../db.config.json');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const db = require('../_helpers/db');
@@ -57,7 +57,7 @@ async function create(userInfo) {
     }
 
     // Hasher le mot de passe
-    const hashedPassword = await bcrypt.hash(userInfo.password, 10);
+    userInfo.password = await bcrypt.hash(userInfo.password, 10);
 
     // // Lire l'image téléchargée par l'utilisateur et la convertir en données binaires
     // const avatar = await fs.promises.readFile(userInfo.avatarUrl);
@@ -73,6 +73,9 @@ async function create(userInfo) {
     await user.save();
     // Ajouter la relation avec l'entreprise
     //await user.addEntreprise(userInfo.EntrepriseId);
+
+
+
 }
 
 
