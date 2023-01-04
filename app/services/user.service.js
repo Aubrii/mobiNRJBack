@@ -1,8 +1,10 @@
-const config = require('../db.config.json');
+const config = require('../../db.config.json');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const db = require('../_helpers/db');
 const fs = require("fs");
+const logService = require('./log.service');
+let currentUserId = null;
 
 
 module.exports = {
@@ -27,12 +29,25 @@ async function addMobiToUser(userID, params){
 async function authenticate({ email, password }) {
     const user = await db.User.findOne({ where: { email } });
 
-    if (!user || !(await bcrypt.compare(password, user.password)))
+    if (!user || !(await bcrypt.compare(password, user.password))){
         throw 'Username or password is incorrect';
+    }else{
+        // authentication successful
+        const token = jwt.sign({sub:user}, config.secret, { expiresIn: '7d' });
 
-    // authentication successful
-    const token = jwt.sign({sub:user}, config.secret, { expiresIn: '7d' });
-    return { ...omitHash(user.get()), token };
+        currentUserId = user.getDataValue('id');
+        // console.log("utilisateur courant : ", currentUserId)
+        await logService.userConnecting(user)
+        const date = new Date();
+        console.log(user);
+        // console.log("date: ",date)
+        console.log(date.toISOString())
+        user.setDataValue('lastName', 'toto')
+        return { ...omitHash(user.get()), token };
+    }
+
+
+
 }
 
 async function getAll() {
@@ -47,44 +62,39 @@ async function getById(id) {
 }
 
 async function create(userInfo) {
-    // Valider les entrées de l'utilisateur
-    // ...
-
-    // Vérifier si un utilisateur avec la même adresse e-mail existe déjà
     const existingUser = await db.User.findOne({ where: { email: userInfo.email } });
     if (existingUser) {
         throw new Error(`Un utilisateur avec l'adresse e-mail ${userInfo.email} existe déjà`);
+    }else{
+        // Hasher le mot de passe
+        const hashedPassword = await bcrypt.hash(userInfo.password, 10);
+        userInfo.password = hashedPassword;
+        const user = new db.User(userInfo);
+        await user.save();
+        const admin = await db.User.findByPk(currentUserId)
+        await logService.adminCreateUser(admin, user);
+
     }
-
-    // Hasher le mot de passe
-    userInfo.password = await bcrypt.hash(userInfo.password, 10);
-
-    // // Lire l'image téléchargée par l'utilisateur et la convertir en données binaires
-    // const avatar = await fs.promises.readFile(userInfo.avatarUrl);
-    // console.log(avatar)
-    // console.log(userInfo.avatarUrl)
-
-    // Créer l'utilisateur dans la base de données
-
-
-    const user = new db.User(userInfo);
-
-    // save client
-    await user.save();
-    // Ajouter la relation avec l'entreprise
-    //await user.addEntreprise(userInfo.EntrepriseId);
-
 
 
 }
 
 
 
-
+async function updateDateConnected(email, newDateTime){
+    console.log("email et newDate : ",email, newDateTime)
+    const user = await db.User.findOne({
+        where:{email : email}
+    })
+    user.updatedAt = newDateTime;
+    user.save();
+}
 async function update(id, params) {
     const user = await getUser(id);
 //TODO: VOIR LA METHODE POUR UPDATE
     // validate
+    console.log("console de l'utilisateur ", user)
+    console.log("console des params ", params)
     const usernameChanged = params.email && user.email !== params.email;
     if (usernameChanged && await db.User.findOne({ where: { email: params.email } })) {
         throw 'Username "' + params.email + '" is already taken';
@@ -97,8 +107,7 @@ async function update(id, params) {
         // Copie de la valeur existante du mot de passe
         params.password = user.password;
     }
-
-
+    await logService.userUpdateUser(user, params)
     // copy params to user and save
     Object.assign(user, params);
     console.log(params);
@@ -109,11 +118,17 @@ async function update(id, params) {
     return omitHash(user.get());
 }
 
+
 async function _delete(id) {
     const user = await getUser(id);
-    await user.destroy();
+    if(user){
+        const admin = await db.User.findByPk(currentUserId)
+        await logService.adminDeleteUser(admin, user)
+        await user.destroy();
+    }else{
+        throw "L'utilisateur n'existe pas"
+    }
 }
-
 // helper functions
 
 async function getUser(id) {

@@ -11,11 +11,11 @@ const authorize = require("../_middleware/authorize");
 // routes
 
 router.post('/test/:id', addMobiToUsers)
-router.get('/',authorize(), getAll);
-router.get('/:id',authorize(), getById);
-router.post('/new',authorize(), createSchema, create,);
-router.put('/:id',authorize(), updateSchema, update);
-router.delete('/:id',authorize(), _delete);
+router.get('/',getAll);
+router.get('/:id', getById);
+router.post('/new', createSchema, create,);
+router.put('/:id', updateSchema, update);
+router.delete('/:id', _delete);
 router.post('/authenticate', authenticateSchema, authenticate);
 router.get('/current',authorize(), getCurrent);
 

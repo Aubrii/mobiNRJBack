@@ -10,6 +10,7 @@ function model(sequelize) {
         email: { type: DataTypes.STRING, allowNull: false },
         password: { type: DataTypes.STRING, allowNull: false },
         avatarUrl: {type: DataTypes.STRING, },
+        lastLogin:{type: DataTypes.DATE},
     };
 
     const options = {
