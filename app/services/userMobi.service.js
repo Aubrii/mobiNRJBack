@@ -20,6 +20,7 @@ module.exports = {
 
 async function getAll() {
     return await db.UserMobi.findAll({
+
     });
 }
 
@@ -106,7 +107,6 @@ async function _delete(id) {
 
 async function getUserMobi(id) {
     const userMobi = await db.UserMobi.findByPk(id,{
-        include:[db.User, db.Mobi]
     });
     if (!userMobi) throw 'User not found';
     return userMobi;

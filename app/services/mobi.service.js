@@ -17,7 +17,7 @@ module.exports = {
 
 async function getAll() {
     return await db.Mobi.findAll({
-        include:[db.User]
+        include:[db.User, db.Localisation]
     });
 }
 
@@ -76,7 +76,7 @@ async function _delete(id) {
 
 async function getMobi(id) {
     const mobi = await db.Mobi.findByPk(id,{
-        include:[db.User]
+        include:[db.User, db.Localisation]
     });
     if (!mobi) throw 'User not found';
     return mobi;

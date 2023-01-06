@@ -22,12 +22,15 @@ async function initialize() {
     // init models and add them to the exported db object
     db.User = require('../models/user.model')(sequelize);
     db.Mobi = require('../models/mobi.model')(sequelize);
-    db.UserMobi = require('../models/userMobi.model')(sequelize)
-    db.Log = require('../models/log.model')(sequelize)
+    db.UserMobi = require('../models/userMobi.model')(sequelize);
+    db.Log = require('../models/log.model')(sequelize);
+    db.Localisation = require('../models/localisation.model')(sequelize);
 
     db.User.belongsToMany(db.Mobi, {through: db.UserMobi});
     db.Mobi.belongsToMany(db.User, {through: db.UserMobi});
 
+    db.User.belongsTo(db.Localisation)
+    db.Mobi.belongsTo(db.Localisation)
 
 
     // sync all models with database

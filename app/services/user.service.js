@@ -52,7 +52,7 @@ async function authenticate({ email, password }) {
 
 async function getAll() {
     return await db.User.findAll({
-        include:[db.Mobi]
+        include:[db.Mobi, db.Localisation]
     });
 }
 
@@ -133,7 +133,7 @@ async function _delete(id) {
 
 async function getUser(id) {
     const user = await db.User.findByPk(id,{
-        include:[db.Mobi]
+        include:[db.Mobi, db.Localisation]
     });
     if (!user) throw 'User not found';
     return user;
