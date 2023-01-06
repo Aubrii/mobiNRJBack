@@ -96,10 +96,13 @@ function createSchema(req, res, next) {
     const schema = Joi.object({
         firstName: Joi.string().required(),
         lastName: Joi.string().required(),
-        role: Joi.string().valid(Role.Admin, Role.Users,Role.SuperAdmin).required(),
+        role: Joi.string().valid(Role.Admin, Role.Users).required(),
         email: Joi.string().email().required(),
         password: Joi.string().min(6).required(),
-        avatarUrl: Joi.string()
+        avatarUrl: Joi.string(),
+        mobiNRJ:Joi.string(),
+        quantityAutorize:Joi.number()
+
 
     },);
     console.log('toto')
@@ -110,10 +113,13 @@ function updateSchema(req, res, next) {
     const schema = Joi.object({
         firstName: Joi.string().empty(''),
         lastName: Joi.string().empty(''),
-        role: Joi.string().valid(Role.Admin, Role.Users,Role.SuperAdmin).empty(''),
+        role: Joi.string().valid(Role.Admin, Role.Users).empty(''),
         email: Joi.string().email().empty(''),
         password: Joi.string().min(6).empty(''),
-        avatarUrl: Joi.string()
+        avatarUrl: Joi.string(),
+        mobiNRJ:Joi.string(),
+        quantityAutorize:Joi.number()
+
 
 
     })

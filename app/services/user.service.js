@@ -1,4 +1,4 @@
-const config = require('../../db.config.json');
+const config = require('../db.config.json');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const db = require('../_helpers/db');
@@ -71,8 +71,20 @@ async function create(userInfo) {
         userInfo.password = hashedPassword;
         const user = new db.User(userInfo);
         await user.save();
+        console.log(userInfo)
+        // const mobi = new db.Mobi()
+
+        //await user.addMobi(userInfo.mobiNRJ)
+
+        const test = new db.UserMobi({
+           UserId: user.id,
+           MobiId:  userInfo.mobiNRJ,
+            quantityAutorize: userInfo.quantityAutorize
+        })
+        test.save();
         const admin = await db.User.findByPk(currentUserId)
         await logService.adminCreateUser(admin, user);
+
 
     }
 
